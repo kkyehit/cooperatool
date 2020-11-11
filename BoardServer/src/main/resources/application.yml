@@ -1,0 +1,39 @@
+server:
+  port: 8200
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${eurekaSvc}:${eurekaPort}/eureka/
+
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MySQL_URL}:${MySQL_PORT}/${MySQL_DB}?serverTimezone=UTC
+    password: ${MySQL_PW}
+    username: ${MySQL_USER}
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+#spring:
+#  datasource:
+#    driverClassName: com.mysql.cj.jdbc.Driver
+#    password: a1b2c3d4e5
+#    url: jdbc:mysql://localhost:3306/sixfourfour?serverTimezone=UTC
+#    username: root
+#  jpa:
+#    database: mysql
+#    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+#    generate-ddl: true
+#    hibernate:
+#      ddl-auto: creae
+#    show-sql: true

@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>sign-in</title>
+    <meta charset="UTF-8">
+    <!--meta id="_csrf" th:content="${csrf.token}"/-->
+    <!--meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/-->
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/foruser.js"></script>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.css">
+</head>
+
+<body>
+<div>
+    <form name="login">
+        <table width=auto>
+            <p>
+                <label>아이디</label><br>
+                <input type="text" id="loginID" class="form-control" placeholder="아이디를 입력하세요">
+            </p>
+            <p>
+                <label>비밀번호</label><br>
+                <input type="password" id="loginPW" class="form-control" placeholder="비밀번호를 입력하세요">
+            </p>
+            <p>
+                <button type="button" class="btn btn-primary" id="loginBtn">로그인</button>
+                <button id="signUpBtn" class="btn">회원가입</button>
+            <div class="modal fade" id="testModal" tabindex="-1" role="dialog"
+                 aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">회원가입</h5>
+                            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">X</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <label>이름</label><input type="text" id="s_name" class="form-control"
+                                                    placeholder="이름을 입력하세요"><br>
+                            <label>아이디</label><input type="text" id="s_id" class="form-control"
+                                                     placeholder="아이디를 입력하세요"><br>
+                            <label>비밀번호</label> <input type="password" name="userPwd" id="pwd1"
+                                                       class="form-control" placeholder="비밀번호를 입력하세요" required /> <br>
+                            <label>비밀번호 확인</label> <input type="password" name="reuserPwd" id="pwd2"
+                                                          class="form-control" placeholder="비밀번호를 재입력하세요" required /> <br>
+                            <div class="alert alert-success" id="alert-success">비밀번호가 일치합니다.</div>
+                            <div class="alert alert-danger" id="alert-danger">비밀번호가 일치하지 않습니다.</div>​
+                        </div>
+                        <div class="modal-footer">
+                            <a class="btn" id="modalY" href="#">가입</a>
+                            <button class="btn" type="button" data-dismiss="modal">취소</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </p>
+        </table>
+    </form>
+</div>
+</body>
+
+
+
+<script>
+    $('#signUpBtn').click(function (e) {
+        e.preventDefault();
+        $('#testModal').modal("show");
+    });
+</script>
+<script type="text/javascript">
+    $(function () {
+        $("#alert-success").hide();
+        $("#alert-danger").hide();
+        $("input").keyup(function () {
+            var pwd1 = $("#pwd1").val();
+            var pwd2 = $("#pwd2").val();
+            if (pwd1 != "" || pwd2 != "") {
+                if (pwd1 == pwd2) {
+                    $("#alert-success").show();
+                    $("#alert-danger").hide(); $("#submit").removeAttr("disabled");
+                } else {
+                    $("#alert-success").hide(); $("#alert-danger").show();
+                    $("#submit").attr("disabled", "disabled");
+                }
+            }
+        });
+    });
+
+    $('#loginBtn').click(function () {
+        var objID = $("#loginID").val();
+        var objPW = $("#loginPW").val();
+
+        if (objID === "") {
+            alert("아이디를 입력하세요");
+            $("#loginID").focus();
+            return;
+        }
+        else if (objPW === "") {
+            alert("비밀번호를 입력하세요");
+            $("#loginPW").focus();
+            return;
+        }
+
+        var loginJson = new Object();
+
+        loginJson.userId = objID;
+        loginJson.userPw = objPW;
+
+        var resultJson = JSON.stringify(loginJson);
+
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:8080/users/login",
+            accept: "application/json",
+            contentType: "application/json",
+            dataType: 'text',
+            data: JSON.stringify(loginJson),
+            success: successCall,
+            error: errorCall
+        })
+        function successCall() {
+            alert("전송성공");
+            window.location.href = "TEST.html";
+        }
+        function errorCall() {
+            alert("전송실패");
+        }
+    });
+
+    $("#modalY").click(function () {
+        var sName = $("#s_name").val();
+        var sID = $("#s_id").val();
+        var sPW1 = $("#pwd1").val();
+        var sPW2 = $("#pwd2").val();
+
+        if (sName === "") {
+            alert("이름을 입력하세요");
+            $("s_name").focus();
+            return;
+        }
+        else if (sID === "") {
+            alert("아이디를 입력하세요");
+            $("#s_id").focus();
+            return;
+        }
+        else if (sPW1 === "") {
+            alert("비밀번호를 입력하세요");
+            $("#pwd1").focus();
+            return;
+        }
+        else if (sID === "") {
+            alert("비밀번호 확인을 입력하세요");
+            $("#pwd2").focus();
+            return;
+        }
+
+        var signupObj = new Object();
+
+        signupObj.name =sName;
+        signupObj.userId = sID;
+        signupObj.userPw= sPW1;
+
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:8080/users/",
+            accept: "application/json",
+            contentType: "application/json",
+            dataType: 'text',
+            data: JSON.stringify(signupObj),
+            success: function(data) {
+                alert("전송성공");
+                },
+            error:function(request,status,error){
+                alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                console.lo("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                }
+        })
+
+
+
+    });
+</script>
+
+
+</html>

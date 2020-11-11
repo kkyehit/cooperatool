@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>side_navigation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+    <!-- 합쳐지고 최소화된 최신 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+    <!-- 부가적인 테마 -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <!-- 합쳐지고 최소화된 최신 자바스크립트 -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+    <!-- webRTC -->
+    <!--<script src="js/RTCConnection.js"></script>-->
+    <script src="js/socket.io/socket.io.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/webrtc.js"></script>
+
+    <style>
+        /* 사이드바 스타일 */
+        .sidenav {
+
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 50px;
+            left: 0;
+            background-color: rgb(44, 44, 44);
+            overflow-x: hidden;
+            transition: 0.5s ease-in-out;
+
+        }
+
+        .sidenav a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #fff;
+            display: block;
+            transition: 0.2s ease-in-out;
+        }
+
+        .sidenav a:hover,
+        .offcanvas a:focus {
+            color: #000;
+        }
+
+        .closebtn {
+            position: absolute;
+            top: 0;
+            right: 0px;
+            font-size: 20px !important;
+            margin-left: 50px;
+        }
+
+        .openmenu:hover {
+            color: rgb(200, 200, 200);
+            transition: 0.5s ease-in-out;
+        }
+
+        .openmenu {
+            color:rgb(100, 100, 100);
+            cursor: pointer;
+            transition: 0.5s ease-in-out;
+        }
+
+        .openmenu>i {
+            font-size: 40px;
+        }
+        .openmenu>enterRoom{
+            font-size: 23px;
+        }
+        .openmenu>createRoom{
+            font-size: 20px;
+        }
+
+
+
+        /* 미디어쿼리 적용 */
+        @media screen and (max-height:450px) {
+            .sidenav {
+                padding-top: 15px;
+            }
+
+            .sidenav a {
+                font-size: 18px;
+            }
+        }
+    </style>
+
+    <style>
+        #code{
+            width: 70.9%;
+            height: 100%;
+
+            position: absolute;
+            top: 50px;
+            left: 40px;
+            padding-top: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-bottom: 5px;
+            background-color: rgb(255, 255, 255);
+        }
+        #chat{
+            width: 25.7%;
+            height: 100%;
+
+            position: absolute;
+            top: 50px;
+            right: 0px;
+            padding-top: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-bottom: 5px;
+            background-color: rgb(65, 34, 34);
+        }
+
+        aside {
+            position: absolute;
+            left:0px;
+            top: 50px;
+
+            padding-left: 7px;
+
+            width: 40px;
+            height: 100%;
+            background-color: rgb(55, 55, 55);
+        }
+
+        header {
+            width: 100%;
+
+        }
+        .nav-link{
+            color: rgb(100, 100, 100);
+        }
+    </style>
+
+</head>
+
+<body>
+<header>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <!--툴바-->
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Cooperatool</a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#"><span class="glyphicon glyphicon-user"></span> 이름 뜨게 해야댐</a></li>
+                <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<div id="mysidenav" class="sidenav">
+    <a href="#" class="closebtn" onclick='closeNav()'>x</a>
+    <a href="#">사용자 목록</a>
+    <a href="#">채팅</a>
+    <!--<a href="#" onclick='onUserMedia()'>음성채팅 허용</a>-->
+    <a href="#" onclick='pageReady()'>영상통화 시작</a>
+
+    <!--<video controls autoplay style="visibility:collapse" ></video>-->
+
+
+</div>
+
+
+<div id="code">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#source">Source Code</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#board">Board</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#calendar">Calendar</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#db">Database</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#paint">Paint</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="source">
+            <p>source</p>
+        </div>
+        <div class="tab-pane fade" id="board">
+            <p>board</p>
+        </div>
+        <div class="tab-pane fade" id="calendar">
+            <p>calendar</p>
+        </div>
+        <div class="tab-pane fade" id="db">
+            <p>database</p>
+        </div>
+        <div class="tab-pane fade" id="paint">
+            <p>paint</p>
+        </div>
+    </div>
+</div>
+<div id="chat">
+    <p><textarea style="width:100%" rows="30"></textarea></p>
+</div>
+<div class="videos">
+    <div>
+        <video id="localVideo" autoplay muted playsinline ></video>
+    </div>
+</div>
+
+<aside>
+        <span class="openmenu" onclick='openNav()'><i class="fa fa-angle-double-right fa-5" aria-hidden="true"></i>
+        </span>
+    <br>
+    <br>
+    <span class="openmenu" onclick='openNav()'><enterRoom class="glyphicon glyphicon-plus" aria-hidden="true"></enterRoom>
+        </span>
+    <br>
+    <br>
+    <span class="openmenu" onclick='openNav()'><createRoom class="glyphicon glyphicon-log-in" aria-hidden="true"></createRoom>
+
+</aside>
+
+
+
+<div id="main">
+    <div class="modal fade" id="testModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">방 생성</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label>방 제목</label><input type="text" id="r_name" class="form-control"
+                                              placeholder="방 제목을 입력하세요"><br>
+
+                </div>
+                <div class="modal-footer">
+                    <a class="btn" id="modalY" href="#">생성</a>
+                    <button class="btn" type="button" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        function openNav() {
+            document.getElementById('mysidenav').style.width = '250px';
+
+        }
+        function closeNav() {
+            document.getElementById('mysidenav').style.width = '0';
+
+        }
+
+        $('#createRoom').click(function(e){ // 방 생성 모달
+            e.preventDefault();
+            $('#testModal').modal("show");
+        });
+    </script>
+
+    <!--<video controls autoplay style="visibility:collapse" ></video>-->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <!--<script type="text/javascript">
+        pageReady();
+    </script>-->
+
+</body>
+
+</html>
+
+
+

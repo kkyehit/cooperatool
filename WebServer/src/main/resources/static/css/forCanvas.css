@@ -1,0 +1,14 @@
+canvas {
+  border: solid black 1px;
+  box-shadow: 3px 3px 5px grey;
+  float: right;
+}
+
+#tool {
+  width: 100%;
+}
+
+#jsRange,
+#jsERange {
+  display: inline;
+}

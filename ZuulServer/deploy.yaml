@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zuul-dp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: app
+      service: zuul
+  template:
+    metadata:
+      labels:
+        type: app
+        service: zuul
+    spec:
+      containers:
+        - name: zuul
+          image: cooperatoolcr.azurecr.io/zuul:latest
+          env:
+            - name: eurekaSvc
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: eurekaSvc
+            - name: eurekaPort
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: eurekaPort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zuul-svc
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5555
+      protocol: TCP
+      targetPort: 5555
+      name: zuul1
+    - port: 5556
+      protocol: TCP
+      targetPort: 5555
+      name: zuul2
+    - port: 5557
+      protocol: TCP
+      targetPort: 5555
+      name: zuul3
+  selector:
+    type: app
+    service: zuul

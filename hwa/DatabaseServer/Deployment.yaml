@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database-docker-deployment
+  labels:
+    app: database-docker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database-docker
+  template:
+    metadata:
+      labels: #pod
+        app: database-docker
+    spec:
+      containers:
+        - name: database-docker
+          image: cooperatoolcr.azurecr.io/database
+          env:
+            - name: eurekaSvc
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: eurekaSvc
+            - name: eurekaPort
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: eurekaPort
+            - name: MySQL_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-info
+                  key: MySQL_URL
+            - name: MySQL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-info
+                  key: MySQL_PORT
+            - name: MySQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-info
+                  key: MySQL_USER
+            - name: MySQL_PW
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-info
+                  key: MySQL_PW
+            - name: MySQL_DB
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-info
+                  key: MySQL_DB

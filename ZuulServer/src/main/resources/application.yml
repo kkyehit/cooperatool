@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: zuulServer
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${eurekaSvc}:${eurekaPort}/eureka/
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 130000
+ribbon:
+  ConnectTimeout: 3000
+  ReadTimeout: 60000

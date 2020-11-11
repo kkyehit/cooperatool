@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cooperatool</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+    <!-- 합쳐지고 최소화된 최신 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+    <!-- 부가적인 테마 -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <!-- 합쳐지고 최소화된 최신 자바스크립트 -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <!---->
+    <link href='hwa/@fullcalendar/core/main.css' rel='stylesheet' />
+    <link href='hwa/@fullcalendar/daygrid/main.css' rel='stylesheet' />
+    <script src='hwa/@fullcalendar/core/main.js'></script>
+    <script src='hwa/@fullcalendar/daygrid/main.js'></script>
+    <script src='hwa/@fullcalendar/interaction/main.js'></script>
+
+    <!-- webRTC -->
+    <!--<script src="js/RTCConnection.js"></script>-->
+    <script src="js/socket.io/socket.io.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/webrtc.js"></script>
+
+    <style>
+        /* 사이드바 스타일 */
+        .sidenav {
+            
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 50px;
+            left: 0;
+            background-color: rgb(44, 44, 44);
+            overflow-x: hidden;
+            transition: 0.5s ease-in-out;
+            
+        }
+
+        .sidenav a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #fff;
+            display: block;
+            transition: 0.2s ease-in-out;
+        }
+
+        .sidenav a:hover,
+        .offcanvas a:focus {
+            color: #000;
+        }
+
+        .closebtn {
+            position: absolute;
+            top: 0;
+            right: 0px;
+            font-size: 20px !important;
+            margin-left: 50px;
+        }
+
+        .openmenu:hover {
+            color: rgb(200, 200, 200);
+            transition: 0.5s ease-in-out;
+        }
+
+        .openmenu {
+            color:rgb(100, 100, 100);
+            cursor: pointer;
+            transition: 0.5s ease-in-out;
+        }
+
+        .openmenu>i {
+            font-size: 40px;
+        }
+        #createRoom {
+            font-size: 23px;
+            color:rgb(100, 100, 100);
+        }
+        #enterRoom {
+            font-size: 20px;
+            color:rgb(100, 100, 100);
+        }
+       
+
+        /* 미디어쿼리 적용 */
+        @media screen and (max-height:450px) {
+            .sidenav {
+                padding-top: 15px;
+            }
+
+            .sidenav a {
+                font-size: 18px;
+            }
+        }
+    </style>
+
+    <style>
+        #code{
+            width: 70.9%;
+            height: 100%;
+           
+            position: absolute;
+            top: 50px;
+            left: 40px;
+            padding-top: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-bottom: 5px;
+            background-color: rgb(255, 255, 255);
+        }
+        #fcalendar{
+            width: 98%;
+            height: 100%;
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            
+        }
+        #chat{
+            width: 25.7%;
+            height: 100%;
+           
+            position: absolute;
+            top: 50px;
+            right: 0px;
+            padding-top: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-bottom: 5px;
+            background-color: rgb(65, 34, 34);
+        }
+
+        aside {
+            position: absolute;
+            left:0px;
+            top: 50px;
+            
+            padding-left: 7px;
+            
+            width: 40px;
+            height: 100%;
+            background-color: rgb(55, 55, 55);
+        }
+
+        header {
+            width: 100%;
+
+        }
+        
+        .nav-link{
+            color: rgb(100, 100, 100);
+        }
+    </style>
+
+      <style type="text/css" media="screen">
+        body {
+            overflow: scroll;
+        }
+        .forSource{
+            height: 85vh;
+            width: 100%;
+        }
+        #editor{
+            height: 100%;
+            width: 100%;
+        }
+       
+      </style>
+      <!-- 채팅 css-->
+      <style> 
+        .panel-body {
+            overflow-y: scroll;
+            height: 790px;
+        }
+      </style>
+
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <!--툴바-->
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Cooperatool</a>
+                </div>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#"><span class="glyphicon glyphicon-user" th:text="|반갑습니다! ${userId}님!|"></span>이화진</a></li>
+                    <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div id="mysidenav" class="sidenav">
+        <a href="#" class="closebtn" onclick='closeNav()'>x</a>
+        <table>
+            <thead>
+                <tr>
+                    <th>List</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="room : ${roomList}">
+                    <td th:text="${room.roomtitle}"><a href="#">room</a></td>
+                    <td th:text="${room.roomid}"><a href="#">roomid</a></td>
+                </tr>
+            </tbody>
+        </table>
+
+
+
+    </div>
+
+    <div id="code">
+        <ul class="nav nav-tabs">
+            <li class="nav-item" id="srcTab">
+              <a class="nav-link" data-toggle="tab" href="#source">Source Code</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#board">Board</a>
+              </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#calendar">Calendar</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#db">Database</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#paint">Paint</a>
+              </li>
+        </ul>
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="source">
+                <div class="forSource">
+                        언어 선택
+                        <select class="selectpicker" id="selectedLang">
+                            <option value="" selected disabled hidden>Choose here</option>
+                            <option value="c_cpp">C/C++</option>
+                            <option value="java">Java</option>
+                            <option value="javascript">Javascript</option>
+                            <option value="html">HTML</option>
+                          </select>
+                    
+                    <pre id="editor"></pre>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="board">
+            
+                <button type="button" class="btn pull-right btn-link" id="writeBoard" onclick="boardWrite()">새 게시물 작성</button>
+                <table id = "boardList" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>제목</th>
+                            <th>작성자</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1번 게시물</td>
+                            <td>박성진</td>
+                        </tr>
+                        <tr>
+                            <td>2번 게시물</td>
+                            <td>계희준</td>
+                        </tr>
+                    </tbody>
+                </table>
+        
+            </div>
+
+            <div class="tab-pane fade" id="calendar">
+                
+                <div id='fcalendar'></div>
+              
+            </div>
+            <div class="tab-pane fade" id="db">
+                <p>database</p>
+            </div>
+            <div class="tab-pane fade" id="paint">
+                <p>paint</p>
+                <iframe width="100%" height="700px" frameborder="0" scrolling="no" src="https://sumopaint.com/flash/api.php"></iframe>
+            </div>
+          </div>
+    </div>
+    <div id="chat">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-comment"></span> Chat
+            </div>
+            <div class="panel-body">
+                <ul class="chat"> </ul>
+            </div>
+            <div class="panel-footer">
+                <div class="input-group">
+                    <input id="msgText" type="text" class="form-control input-sm"
+                        placeholder="메세지를 입력하세요..." />
+                    <span class="input-group-btn">
+                        <button class="btn btn-warning btn-sm" id="btnSend" onclick="sendMsg()">전송</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <a href="#" onclick='pageReady()'>영상통화 시작</a>
+        <div class="videos">
+            <div>
+                <video id="localVideo" autoplay muted playsinline ></video>
+            </div>
+        </div>
+    </div>
+
+    <aside>
+        <span class="openmenu" onclick='openNav()'><i class="fa fa-angle-double-right fa-5" aria-hidden="true"></i>
+        </span>
+        <br>
+        <br>
+        <a href="#"><span id="createRoom" class="glyphicon glyphicon-plus"></span>
+        <br>
+        <br>
+        <a href="#"><span id="enterRoom" class="glyphicon glyphicon-log-in"></span>
+    </aside>
+
+    <!--방 생성 모달-->
+        <div class="modal fade" id="r_create" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">방 생성</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">X</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label>방 제목</label><input type="text" id="r_name" class="form-control"
+                            placeholder="방 제목을 입력하세요"><br>
+
+                    </div>
+                    <div class="modal-footer">
+                        <a class="btn" id="c_modalY" href="#">생성</a>
+                        <button class="btn" type="button" data-dismiss="modal">취소</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--방 입장 모달-->
+        <div class="modal fade" id="r_enter" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">방 참여</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">X</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label>입장 코드</label><input type="text" id="e_code" class="form-control"
+                            placeholder="입장코드을 입력하세요"><br>
+
+                    </div>
+                    <div class="modal-footer">
+                        <a class="btn" id="e_modalY" href="#">입장</a>
+                        <button class="btn" type="button" data-dismiss="modal">취소</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--일정추가 모달-->
+        <div class="modal fade" id="s_add" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">일정 추가</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">X</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label>일정명</label><input type="text" id="schedule_name" class="form-control" ><br>
+                        <label>시작</label><input type="datetime-local" id='currentDatetime' class="form-control" ><br>
+                        
+                        <label>끝</label><input type="datetime-local" id="schedule_end" class="form-control"><br>
+                        <label>하루종일</label><input type="checkbox" id="schedule_allday" class="form-control"><br>
+                        <label>메모</label><input type="text" id="schedule_memo" class="form-control" ><br>
+
+                    </div>
+                    <div class="modal-footer">
+                        <a class="btn" id="add_schedule" href="#">등록</a>
+                        <button class="btn" type="button" data-dismiss="modal">취소</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script type="text/javascript" th:inline="javascript">
+        function openNav() {
+            document.getElementById('mysidenav').style.width = '250px';
+        }
+        function closeNav() {
+            document.getElementById('mysidenav').style.width = '0';
+        }
+
+        $('#createRoom').click(function (e) { // 방 생성 모달
+            e.preventDefault();
+            $('#r_create').modal("show");
+        });
+
+        $("#c_modalY").click(function () {
+            var rName = $("#r_name").val();
+            /* <![CDATA[ */
+            var userId = "[[ ${name} ]]";
+            /* ]]> */
+            if (rName === "") {
+                alert("방 제목을 입력하세요");
+                $("#r_name").focus();
+                return;
+            }
+
+            // $(".sidenav table tbody").append('<tr>');
+            // $(".sidenav table tbody tr").append('<td th:text="${user.email}"><a href="#">' + $('#r_name').val() + '</a>'); // 테스트 부분
+            // $(".sidenav table tbody tr").append('<td th:text="${user.email}"><a href="#">' + $('#r_name').val() + '</a>');//서버에서 받은 roomid
+            // $(".sidenav table tbody").append('</tr>');
+            // alert("방 생성을 성공하였습니다.");
+            $(".sidenav table tbody").append('<tr>');
+            $(".sidenav").append('<a href="#">'+$('#r_name').val()+'</a>');
+            $('#r_create').modal("hide");
+
+            //JSON ID Rname 
+            var obj = new Object();
+            obj.id = userId;
+            obj.roomname = rName;
+            //JSON 으로 ID 랑 Roomname 넘겨줘야함
+            $.ajax({
+                type:"POST",
+                url : "http://localhost:8080/rooms",
+                accept : "application/json",
+                contentType : "application/json",
+                dataType : 'text',
+                data: JSON.stringify(obj),
+                success: successRoomCreate(result),
+                error : errorRoomCreate
+            })
+            function successRoomCreate(result){
+                $(".sidenav table tbody").append('<tr>');
+                $(".sidenav").append('<a href="#">'+$('#r_name').val()+'</a>');
+                alert("방 생성을 성공하였습니다.");
+            }
+            function errorRoomCreate(){
+                alert("방 생성을 실패하였습니다.")
+            }
+        });
+
+        $("#enterRoom").click(function (e) { // 방 입장 모달
+            e.preventDefault();
+            $('#r_enter').modal("show");
+        });
+
+        $("#e_modalY").click(function () {
+            var eName = $('#e_code').val();
+            if (eName === "") {
+                alert("입장 코드를 입력하세요");
+                $("#e_code").focus();
+                return;
+            }
+            // JSON 으로 ID 랑 입장 코드 보내줘야함
+            $.ajax({
+
+            });
+        });
+
+    </script>
+
+<script>
+    var event_name;
+    var choice;
+   //calendar 생성
+   document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('fcalendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      plugins: [ 'dayGrid' ,'interaction' ],
+      events: [
+           {
+               title: "돼지갈비 먹고싶담..",
+               start: "2020-06-08"
+           }
+        ],
+      dateClick: function (info) {
+          choice=info.dateStr;
+        $('#s_add').modal("show"); //일정 추가
+      }
+         
+    });
+    calendar.addEventSource({title:"aa", start:"2020-06-10"})
+    calendar.render();
+  });
+  //오늘날짜말고 선택한 날짜로 디폴트 하고 싶은데 안됨 ㅜㅅㅜ 그리고 시간도 이상함;;
+  document.getElementById('currentDatetime').value = new Date().toISOString().substring(0, 16);
+  //일정 등록
+  $("#add_schedule").click(function () {
+        event_name = $('#schedule_name').val(); //일정명 받아왔는데 캘린더에 어떻게 추가하지..
+        alert(choice+'에 일정이 등록되었습니다.'); //사실 일정 등록 안됨 
+
+        $('#s_add').modal('hide');
+        
+        calendar.addEvent( {'title':event_name, 'start':choice}); // end 미정
+        calendar.render();
+        // $.ajax({
+
+        // });
+    });
+
+    
+</script>
+
+    <script> // Board
+        /*
+        '새 게시물 작성' 클릭 시 작성폼 DOM을 생성한 후 붙여넣음
+        */
+        function boardWrite(){ // 게시판 글 작성
+            //alert("success");
+            var newDIV = document.createElement("div");
+            var board_test = document.getElementById("board");
+            var contents = document.getElementById("writeBoard");
+            newDIV.setAttribute("class","input-group col-xs-12");
+            newDIV.setAttribute("id", "new_contents");
+            newDIV.innerHTML = [
+            "<input type='text' id='b_title' class='form-control' placeholder = '제목을 입력하세요'>",
+            "<br><br>",
+            "<textarea class='form-control' rows='15' id='b_contents' aria-multiline='true' placeholder='내용을 입력하세요'></textarea>",
+            "<br><br>",
+            "<button type='button' id='b_cancel' class='btn pull-right btn-danger'>취소</button>",
+            "<button type='button' id='b_write' class='btn pull-right btn-primary'>작성</button>"
+            ].join(" ");
+
+            board_test.insertBefore(newDIV,contents);
+        }
+        /*
+        '작성' 버튼 클릭 시 테이블에 추가하고 작성폼 DOM 떼어냄
+        */
+        $(document).on("click","#b_write",function () { 
+            var textTitle = $('#b_title').val();
+            var textContents = $('#b_contents').val();
+            if(textTitle ===""){
+                alert("제목을 입력하세요");
+                $("#b_title").focus();
+                return;
+            }
+            else if(textContents ===""){
+                alert("내용을 입력하세요");
+                $("#b_contents").focus();
+                return ;
+            }
+            
+            var str = "";
+            str +=  "<tr>";
+            str +=  "<td>";
+            str +=  textTitle;
+            str +=  "</td>";
+            str += "<td>";
+            str +=  "박성진"; // userID로 수정 필요
+            str +=  "</td>";
+            str +=  "</tr>";
+            $("#board #boardList tbody").append(str);
+
+            var myDiv = document.getElementById("new_contents");
+            var parent = myDiv.parentElement; // 부모 객체 알아내기
+            parent.removeChild(myDiv); // 부모로부터 myDiv 객체 떼어내기
+            alert("글 작성에 성공 하였습니다");
+        });
+         /*
+        '취소' 버튼 클릭 시 작성폼 DOM 떼어냄
+        */
+        $(document).on("click","#b_cancel",function () {
+            alert("글 작성을 취소하였습니다");
+            var myDiv = document.getElementById("new_contents");
+            var parent = myDiv.parentElement; // 부모 객체 알아내기
+            parent.removeChild(myDiv); // 부모로부터 myDiv 객체 떼어내기
+        })
+    </script>
+
+<script src="src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script> 
+<script> // for code editor
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/twilight");
+
+    $('#selectedLang').change(function(){
+        //alert("change "+ $("#selectedLang option:selected").val());
+        alert("change language "+$("#selectedLang option:selected").val());
+        editor.session.setMode("ace/mode/"+$("#selectedLang option:selected").val());
+
+    })
+</script>
+<script>
+$(document).ready(function(){
+    $(".nav-tabs a").click(function(){
+        $(this).tab('show');
+    });
+
+    $('.nav-tabs #srcTab a').on('hide.bs.tab', function(e){
+        $('.forSource').css("display","none");
+    });
+
+    $('.nav-tabs #srcTab a').on('show.bs.tab', function(e){
+        $('.forSource').css("display", "block");
+    });
+});
+
+</script>
+
+<script> // for chat 
+        // $("#btnSend").click(function () {
+        //     var date = new date();
+        //     var d = date.getUTCDate();
+        //     var m = date.getMonth() + 1;
+        //     var y = date.getFullYear();
+        //     var h = date.getHours();
+        //     var min = date.getMinutes();
+
+
+        //    var Fecha = d + "/" + m + "/" + y + "  " + h + ":"+min;
+        //    alert("aa");
+        //    alert(Fecha);
+        // });
+
+        function sendMsg(){
+            var date = new Date();
+            var d = date.getUTCDate();
+            var m = date.getMonth() + 1;
+            var y = date.getFullYear();
+            var h = date.getHours();
+            var min = date.getMinutes();
+
+
+           var Fecha = d + "/" + m + "/" + y + "  " + h + ":"+min + $("#msgText").val();
+           alert(Fecha);
+        }
+</script>
+</body>
+
+</html>

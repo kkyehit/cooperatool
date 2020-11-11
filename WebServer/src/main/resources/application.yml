@@ -1,0 +1,31 @@
+server:
+  port: 8100
+  servlet:
+    session:
+      timeout: 14400
+spring:
+  thymeleaf:
+    cache: false
+    check-template-location: true
+    mode: HTML5
+    order: 0
+    prefix: classpath:templates/
+    suffix: .html
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${eurekaSvc}:${eurekaPort}/eureka/
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 60000
+ribbon:
+  ConnectTimeout: 3000
+  ReadTimeout: 60000

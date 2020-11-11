@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cooperatool</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+    <!-- 합쳐지고 최소화된 최신 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+    <!-- 부가적인 테마 -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <!-- 합쳐지고 최소화된 최신 자바스크립트 -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <!---->
+    <link href='hwa/@fullcalendar/core/main.css' rel='stylesheet' />
+    <link href='hwa/@fullcalendar/daygrid/main.css' rel='stylesheet' />
+    <script src='hwa/@fullcalendar/core/main.js'></script>
+    <script src='hwa/@fullcalendar/daygrid/main.js'></script>
+    <script src='hwa/@fullcalendar/interaction/main.js'></script>
+
+    <!-- WebRTC -->
+    <script src="js/socket.io/socket.io.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/webrtc.js"></script>
+
+    <!-- 방 관련 js -->
+    <script src="js/rooms.js"></script>
+    <!-- 게시글 관련 js -->
+    <script src="js/posts.js"></script>
+    <!-- 컴파일 관련 -->
+    <script src="js/compile.js"></script>
+    <!-- -->
+    <script src="js/source.js"></script>
+
+    <script src="/chat/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+
+    <style>
+        /* 사이드바 스타일 */
+        .sidenav {
+
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 50px;
+            left: 0;
+            background-color: rgb(44, 44, 44);
+            overflow-x: hidden;
+            transition: 0.5s ease-in-out;
+
+        }
+
+        .sidenav td {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #fff;
+            display: block;
+            transition: 0.2s ease-in-out;
+        }
+
+        .sidenav a:hover,
+        .offcanvas a:focus {
+            color: #000;
+        }
+
+        .closebtn {
+            position: absolute;
+            top: 0;
+            right: 0px;
+            font-size: 20px !important;
+            margin-left: 50px;
+        }
+
+        .openmenu:hover {
+            color: rgb(200, 200, 200);
+            transition: 0.5s ease-in-out;
+        }
+
+        .openmenu {
+            color:rgb(100, 100, 100);
+            cursor: pointer;
+            transition: 0.5s ease-in-out;
+        }
+
+        .openmenu>i {
+            font-size: 40px;
+        }
+        #createRoom {
+            font-size: 23px;
+            color:rgb(100, 100, 100);
+        }
+        #enterRoom {
+            font-size: 20px;
+            color:rgb(100, 100, 100);
+        }
+
+
+        /* 미디어쿼리 적용 */
+        @media screen and (max-height:450px) {
+            .sidenav {
+                padding-top: 15px;
+            }
+
+            .sidenav a {
+                font-size: 18px;
+            }
+        }
+    </style>
+
+    <style>
+        #code{
+            width: 70.9%;
+            height: 100%;
+
+            position: absolute;
+            top: 50px;
+            left: 40px;
+            padding-top: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-bottom: 5px;
+            background-color: rgb(255, 255, 255);
+        }
+        #fcalendar{
+            width: 98%;
+            height: 100%;
+            position: absolute;
+            top: 50px;
+            left: 10px;
+
+        }
+        #chat{
+            width: 25.7%;
+            height: 100%;
+
+            position: absolute;
+            top: 50px;
+            right: 0px;
+            padding-top: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-bottom: 5px;
+            background-color: rgb(65, 34, 34);
+        }
+
+        aside {
+            position: absolute;
+            left:0px;
+            top: 50px;
+
+            padding-left: 7px;
+
+            width: 40px;
+            height: 100%;
+            background-color: rgb(55, 55, 55);
+        }
+
+        header {
+            width: 100%;
+
+        }
+
+        .nav-link{
+            color: rgb(100, 100, 100);
+        }
+    </style>
+
+    <style type="text/css" media="screen">
+        body {
+            overflow: scroll;
+        }
+        .forSource{
+            height: 720px;
+            width: 100%;
+            display: none;
+        }
+        #editor{
+            height: 80%;
+            width: 100%;
+        }
+
+      </style>
+
+
+    <!-- chat style-->
+    <style>
+
+.chat
+{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+#chat  .container{
+    width: 100%;
+}
+.chat li
+{
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted #B3A9A9;
+}
+
+.chat li.left .chat-body
+{
+    margin-left: 60px;
+}
+
+.chat li.right .chat-body
+{
+    margin-right: 60px;
+}
+
+
+.chat li .chat-body p
+{
+    margin: 0;
+    color: #777777;
+}
+
+.panel .slidedown .glyphicon, .chat .glyphicon
+{
+    margin-right: 5px;
+}
+
+.panel-body
+{
+    overflow-y: scroll;
+    height: 700px;
+}
+
+::-webkit-scrollbar-track
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar
+{
+    width: 12px;
+    background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #555;
+}
+
+    </style>
+
+</head>
+
+<body>
+<header>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <!--툴바-->
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Cooperatool</a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#"><span class="glyphicon glyphicon-user" th:text="|반갑습니다! ${userId}님 roomcode : ${activatedRoom}|"></span></a></li>
+                <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<div id="mysidenav" class="sidenav">
+    <a href="#" class="closebtn" onclick='closeNav()'>x</a>
+    <table>
+        <thead>
+        <tr>
+            <th>방 이름</th>
+            <th>방 코드</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="room : ${roomList}">
+            <td th:text="${room.name}" th:onclick="|refreshBoardList(${room.roomId})|"><a>방 이름</a></td>
+            <td th:text="${room.roomId}"><a href="#">방 코드</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+
+
+</div>
+
+<div id="code">
+    <ul class="nav nav-tabs">
+        <li class="nav-item" id="srcTab">
+            <a class="nav-link" data-toggle="tab" href="#source">Source Code</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#board">Board</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#calendar">Calendar</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#db">Database</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#paint">Paint</a>
+        </li>
+        <li>
+            <a class="nav-link" data-toggle="tab" href="#videochat">VideoChat</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="source">
+            <div class="forSource">
+                언어 선택
+                <select class="selectpicker" id="selectedLang">
+                    <option value="" selected disabled hidden>Choose here</option>
+                    <option value="c_cpp">C/C++</option>
+                    <option value="java">Java</option>
+                    <option value="javascript">Javascript</option>
+                    <option value="html">HTML</option>
+                </select>
+                <br>
+                <div class="mainClass" style="display: inline;">
+                    Main Class :
+                    <input id="mainClass" type="text" placeholder="클래스명을 입력하세요">
+                </div>
+
+                <button type="button" class="btn pull-right btn-primary" id="execute" onclick="executeCode()" style="display: inline;">코드 실행</button>
+                <pre id="editor"></pre>
+                <textarea class='form-control' rows='12' id='executeResult' aria-multiline='true' readonly></textarea>
+            </div>
+
+        </div>
+        <div class="tab-pane fade" id="board">
+
+            <button type="button" class="btn pull-right btn-link" id="writeBoard" onclick="boardWrite()">새 게시물 작성</button>
+            <table id = "boardList" class="table table-hover">
+                <thead>
+                <tr>
+                    <th>제목</th>
+                    <th>작성자</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="post : ${postList}">
+                    <td th:text="${post.title}" th:onclick="|selectPost('${post.title}', '${post.contents}', '${post.userId}')|"><a>제목</a></td>
+                    <td th:text="${post.userId}"><a>작성자</a></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <thead>
+
+
+        </div>
+
+        <div class="tab-pane fade" id="calendar">
+
+            <div id='fcalendar'></div>
+
+        </div>
+        <div class="tab-pane fade" id="db">
+            <iframe width="100%" height="700px" frameborder="0" scrolling="no" src="https://aquerytool.com"></iframe>
+        </div>
+        <div class="tab-pane fade" id="paint">
+            <iframe width="100%" height="700px" frameborder="0" scrolling="no" src="https://sumopaint.com/flash/api.php"></iframe>
+        </div>
+        <div class="tab-pane fade" id="videochat">
+            <p>video chat</p>
+            <a href="#" onclick='pageReady()'><svg class="bi bi-camera-video-fill" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.667 3h6.666C10.253 3 11 3.746 11 4.667v6.666c0 .92-.746 1.667-1.667 1.667H2.667C1.747 13 1 12.254 1 11.333V4.667C1 3.747 1.746 3 2.667 3z"/>
+                <path d="M7.404 8.697l6.363 3.692c.54.313 1.233-.066 1.233-.697V4.308c0-.63-.693-1.01-1.233-.696L7.404 7.304a.802.802 0 0 0 0 1.393z"/>
+            </svg></a>
+
+            <a href="#" onclick='closeVideo()'>
+                <svg class="bi bi-camera-video-off-fill" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.429 3.55A1.66 1.66 0 0 0 1 4.667v6.666C1 12.253 1.746 13 2.667 13h6.666c.43 0 .821-.162 1.117-.429l-9.02-9.02zm13.111 8.868a.798.798 0 0 0 .46-.726V4.308c0-.63-.693-1.01-1.233-.696L11 5.218v-.551C11 3.747 10.254 3 9.333 3H5.121l9.419 9.418z"/>
+                    <path fill-rule="evenodd" d="M13.646 14.354l-12-12 .708-.708 12 12-.708.707z"/>
+                </svg>
+            </a>
+            <div class="videos">
+                <div>
+                    <video id="localVideo" width="320" height="240" autoplay muted playsinline ></video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div id="chat">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading" id="accordion">
+                        <span class="glyphicon glyphicon-comment"></span> Chat
+                    </div>
+
+                    <div class="panel-body">
+                        <ul class="chat" id="_chat">
+                            <li class="left clearfix"><span class="chat-img pull-left">
+                                    <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" />
+                                </span>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <strong class="primary-font">Jack Sparrow</strong> <small class="pull-right text-muted">
+                                        <span class="glyphicon glyphicon-time"></span>12 mins ago</small>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
+                                        dolor, quis ullamcorper ligula sodales.
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="right clearfix"><span class="chat-img pull-right">
+                                    <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" />
+                                </span>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small>
+                                        <strong class="pull-right primary-font">Bhaumik Patel</strong>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
+                                        dolor, quis ullamcorper ligula sodales.
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="left clearfix"><span class="chat-img pull-left">
+                                    <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" />
+                                </span>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <strong class="primary-font">Jack Sparrow</strong> <small class="pull-right text-muted">
+                                        <span class="glyphicon glyphicon-time"></span>14 mins ago</small>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
+                                        dolor, quis ullamcorper ligula sodales.
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="right clearfix"><span class="chat-img pull-right">
+                                    <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" />
+                                </span>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>15 mins ago</small>
+                                        <strong class="pull-right primary-font">Bhaumik Patel</strong>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
+                                        dolor, quis ullamcorper ligula sodales.
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="panel-footer">
+                        <form class="input-group">
+                            <input id="btn-input" type="text" class="form-control input-sm" placeholder="Type your message here..."  onKeyDown="onKeyDown();"/>
+                            <span class="input-group-btn">
+                                    <button class="btn btn-warning btn-sm" id="btn-chat">Send</button>
+                                </span>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<aside>
+        <span class="openmenu" onclick='openNav()'><i class="fa fa-angle-double-right fa-5" aria-hidden="true"></i>
+        </span>
+    <br>
+    <br>
+    <a href="#"><span id="createRoom" class="glyphicon glyphicon-plus"></span>
+        <br>
+        <br>
+        <a href="#"><span id="enterRoom" class="glyphicon glyphicon-log-in"></span>
+</aside>
+
+<!--방 생성 모달-->
+<div class="modal fade" id="r_create" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">방 생성</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">X</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label>방 제목</label><input type="text" id="r_name" class="form-control"
+                                          placeholder="방 제목을 입력하세요"><br>
+
+            </div>
+            <div class="modal-footer">
+                <a class="btn" id="c_modalY" href="#">생성</a>
+                <button class="btn" type="button" data-dismiss="modal">취소</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--방 입장 모달-->
+<div class="modal fade" id="r_enter" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">방 참여</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">X</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label>입장 코드</label><input type="text" id="e_code" class="form-control"
+                                           placeholder="입장코드을 입력하세요"><br>
+
+            </div>
+            <div class="modal-footer">
+                <a class="btn" id="e_modalY" href="#">입장</a>
+                <button class="btn" type="button" data-dismiss="modal">취소</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--일정추가 모달-->
+<div class="modal fade" id="s_add" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">일정 추가</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">X</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label>일정명</label><input type="text" id="schedule_name" class="form-control" ><br>
+                <label>시작</label><input type="datetime-local" id='currentDatetime' class="form-control" ><br>
+
+                <label>끝</label><input type="datetime-local" id="schedule_end" class="form-control"><br>
+                <label>하루종일</label><input type="checkbox" id="schedule_allday" class="form-control"><br>
+                <label>메모</label><input type="text" id="schedule_memo" class="form-control" ><br>
+
+            </div>
+            <div class="modal-footer">
+                <a class="btn" id="add_schedule" href="#">등록</a>
+                <button class="btn" type="button" data-dismiss="modal">취소</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" th:inline="javascript">
+        function openNav() {
+            document.getElementById('mysidenav').style.width = '250px';
+        }
+        function closeNav() {
+            document.getElementById('mysidenav').style.width = '0';
+        }
+
+        $('#createRoom').click(function (e) { // 방 생성 모달
+            e.preventDefault();
+            $('#r_create').modal("show");
+        });
+
+        $("#c_modalY").click(function () { // 방 생성 버튼 클릭
+            var rName = $("#r_name").val();
+            /* <![CDATA[ */
+            var userId = [[ ${userId} ]];
+            /* ]]> */
+            if (rName === "") {
+                alert("방 제목을 입력하세요");
+                $("#r_name").focus();
+                return;
+            }
+            $('#r_create').modal("hide");
+
+            //JSON ID Rname
+            var obj = new Object();
+            obj.userId = userId;
+            obj.name = rName;
+            //JSON 으로 ID 랑 Roomname 넘겨줘야함
+            $.ajax({
+                type:"POST",
+                url : zuulserver+"/roomserver/rooms/create",
+                accept : "application/json",
+                contentType : "application/json",
+                dataType : 'text',
+                data: JSON.stringify(obj),
+                success: successRoomCreate(""),
+                error : errorRoomCreate
+            })
+            function successRoomCreate(result){
+                alert("방 생성을 성공하였습니다.");
+                refreshRoomList();
+            }
+            function errorRoomCreate(){
+                alert("방 생성을 실패하였습니다.")
+            }
+        });
+
+        $("#enterRoom").click(function (e) { // 방 입장용 모달
+            e.preventDefault();
+            $('#r_enter').modal("show");
+        });
+
+        $("#e_modalY").click(function () {// 방 입장 버튼 클릭
+            var eName = $('#e_code').val();
+            /* <![CDATA[ */
+            var userId = [[ ${userId} ]];
+            /* ]]> */
+            if (eName === "") {
+                alert("입장 코드를 입력하세요");
+                $("#e_code").focus();
+                return;
+            }
+            //JSON ID,CODE
+            var obj = new Object();
+            obj.userId = userId;
+            obj.roomId = eName;
+
+            $('#r_enter').modal("hide");
+            // JSON 으로 ID 랑 입장 코드 보내줘야함
+            $.ajax({
+                type:"POST",
+                url:zuulserver+"/roomserver/rooms/enter",
+                accept:"application/json",
+                contentType:"application/json",
+                dataType:'text',
+                data: JSON.stringify(obj),
+                success: successRoomEnter(),
+                error : errorRoomEnter
+            })
+            function successRoomEnter(){
+                alert("방 입장에 성공하였습니다.");
+                refreshRoomList();
+            }
+            function errorRoomEnter(){
+                alert("방 입장에 실패하였습니다.");
+            }
+        });
+
+    </script>
+
+<script>
+    var event_name;
+    var choice;
+   //calendar 생성
+   document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('fcalendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      plugins: [ 'dayGrid' ,'interaction' ],
+      events: [
+           {
+               title: "돼지갈비 먹고싶담..",
+               start: "2020-06-08"
+           }
+        ],
+      dateClick: function (info) {
+          choice=info.dateStr;
+        $('#s_add').modal("show"); //일정 추가
+      }
+  //일정 등록
+  $("#add_schedule").click(function () {
+        event_name = $('#schedule_name').val(); //일정명 받아왔는데 캘린더에 어떻게 추가하지..
+        alert(choice+'에 일정이 등록되었습니다.'); //사실 일정 등록 안됨
+
+        $('#s_add').modal('hide');
+
+        calendar.addEvent( {'title':event_name, 'start':choice}); // end 미정
+        calendar.render();
+        // $.ajax({
+
+        // });
+    });
+    });
+    calendar.addEventSource({title:"aa", start:"2020-06-10"});
+    calendar.render();
+  });
+  //오늘날짜말고 선택한 날짜로 디폴트 하고 싶은데 안됨 ㅜㅅㅜ 그리고 시간도 이상함;;
+  document.getElementById('currentDatetime').value = new Date().toISOString().substring(0, 16);
+
+
+</script>
+
+<script> // Board
+        /*
+        '새 게시물 작성' 클릭 시 작성폼 DOM을 생성한 후 붙여넣음
+        */
+        function boardWrite(){ // 게시판 글 작성
+            //alert("success");
+            var newDIV = document.createElement("div");
+            var board_test = document.getElementById("board");
+            var contents = document.getElementById("writeBoard");
+            newDIV.setAttribute("class","input-group col-xs-12");
+            newDIV.setAttribute("id", "new_contents");
+            newDIV.innerHTML = [
+            "<input type='text' id='b_title' class='form-control' placeholder = '제목을 입력하세요'>",
+            "<br><br>",
+            "<textarea class='form-control' rows='15' id='b_contents' aria-multiline='true' placeholder='내용을 입력하세요'></textarea>",
+            "<br><br>",
+            "<button type='button' id='b_cancel' class='btn pull-right btn-danger'>취소</button>",
+            "<button type='button' id='b_write' class='btn pull-right btn-primary'>작성</button>"
+            ].join(" ");
+
+            board_test.insertBefore(newDIV,contents);
+        }
+        /*
+        '작성' 버튼 클릭 시 테이블에 추가하고 작성폼 DOM 떼어냄
+        */
+        $(document).on("click","#b_write",function () {
+            var textTitle = $('#b_title').val();
+            var textContents = $('#b_contents').val();
+            if(textTitle ===""){
+                alert("제목을 입력하세요");
+                $("#b_title").focus();
+                return;
+            }
+            else if(textContents ===""){
+                alert("내용을 입력하세요");
+                $("#b_contents").focus();
+                return ;
+            }
+
+            createPosts(textTitle, textContents, "[[ ${userId} ]]", "[[ ${activatedRoom} ]]");
+        });
+         /*
+        '취소' 버튼 클릭 시 작성폼 DOM 떼어냄
+        */
+        $(document).on("click","#b_cancel",function () {
+            alert("글 작성을 취소하였습니다");
+            var myDiv = document.getElementById("new_contents");
+            var parent = myDiv.parentElement; // 부모 객체 알아내기
+            parent.removeChild(myDiv); // 부모로부터 myDiv 객체 떼어내기
+        })
+    </script>
+
+<script src="src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script> // for code editor
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/twilight");
+
+    $('#selectedLang').change(function(){
+        //alert("change "+ $("#selectedLang option:selected").val());
+        alert("change language "+$("#selectedLang option:selected").val());
+        editor.session.setMode("ace/mode/"+$("#selectedLang option:selected").val());
+    })
+
+</script>
+<script> // tab 이동시 div 차지하는 문제 해결하는 script code
+$(document).ready(function(){
+    $(".nav-tabs a").click(function(){
+        $(this).tab('show');
+    });
+
+    $('.nav-tabs #srcTab a').on('hide.bs.tab', function(e){
+        $('.forSource').css("display","none");
+    });
+
+    $('.nav-tabs #srcTab a').on('show.bs.tab', function(e){
+        $('.forSource').css("display", "block");
+    });
+});
+
+</script>
+
+
+<script> // for chat
+var stompClient = null;
+var date = new Date();
+var d = date.getUTCDate();
+var m = date.getMonth() + 1;
+var y = date.getFullYear();
+var h = date.getHours();
+var min = date.getMinutes();
+
+
+var time = y + "/" + m + "/" + d + "  " + h + ":"+min;
+
+
+function setConnected(connected) {
+    $("#connect").prop("disabled", connected);
+    $("#disconnect").prop("disabled", !connected);
+
+    $("#_chat").html("");
+}
+
+function connect() {
+    var roomId = "[[ ${activatedRoom} ]]";
+    var socket = new SockJS(chattingServer+'/websocket');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+        setConnected(true);
+        console.log('Connected: ' + frame);
+
+        ///topic/${roomID}
+        stompClient.subscribe('/topic/' + roomId, function (chat) { //받는거
+            showChat(JSON.parse(chat.body));
+        });
+    });
+}
+
+function disconnect() {
+    if (stompClient !== null) {
+        stompClient.disconnect();
+    }
+    setConnected(false);
+    console.log("Disconnected");
+}
+
+
+function sendChat() {
+    var roomId = "[[ ${activatedRoom} ]]";
+    var userId = "[[ ${userId}]]"
+    //"/app/${roomId}"
+    //"/app/"+$("#roomID").val()+"/"
+    stompClient.send("/app/" + roomId, {}, JSON.stringify({ 'roomId': roomId, 'userId': userId, 'chatStr': $("#btn-input").val() }));
+
+}
+
+function showChat(chat) {
+    if("[[ ${userId} ]]" === chat.userId){
+        var newChat = document.createElement("li");
+        var oldChat = document.getElementById('_chat');
+        newChat.setAttribute("class","right clearfix");
+        newChat.innerHTML = [
+        "<span class='chat-img pull-right'>",
+        "<img src='http://placehold.it/50/FA6F57/fff&text=ME' alt='User Avatar' class='img-circle' />",
+        "</span>",
+        "<div class='chat-body clearfix'>",
+        "<div class='header'>",
+        "<small class='text-muted'><span class='glyphicon glyphicon-time'></span>",
+        time,
+        "<strong class='pull-right primary-font'>",
+        chat.userId,
+        "</strong><div>",
+        "<p>",
+        chat.chatStr,
+        "</p></div>"
+    ].join(" ");
+    oldChat.append(newChat);
+    }
+    else{
+        var newChat = document.createElement("li");
+        var oldChat = document.getElementById('_chat');
+        newChat.setAttribute("class","left clearfix");
+        newChat.innerHTML = [
+        "<span class='chat-img pull-left'>",
+        "<img src='http://placehold.it/50/819FF7/fff&text=", chat.userId[0], chat.userId[1] ,"'alt='User Avatar' class='img-circle' />",
+        "</span>",
+        "<div class='chat-body clearfix'>",
+        "<div class='header'>",
+        "<small class='text-muted'><span class='glyphicon glyphicon-time'></span>",
+        time,
+        "<strong class='pull-right primary-font'>",
+        chat.userId,
+        "</strong><div>",
+        "<p>",
+        chat.chatStr,
+        "</p></div>"
+    ].join(" ");
+    oldChat.append(newChat);
+    }
+}
+
+$(function () {
+    $("form").on('submit', function (e) {
+        e.preventDefault();
+        $("#btn-input").val("");
+    });
+    $("#connect").click(function () { connect(); });
+    $("#disconnect").click(function () { disconnect(); });
+    $("#btn-chat").click(function () { sendChat(); });
+
+});
+
+
+</script>
+
+<script> //board read
+
+    $(document).on("click",".test",function(){
+        var str="";
+        var tdArr=[];
+
+        var tr = $(this);
+        var td = tr.children();
+        $(this).each(function(i){
+            tdArr.push(td.eq(i).text());
+        })
+        var board_title = td.eq(0).text();
+        var user_name = td.eq(1).text();
+
+        var newDIV = document.createElement("div");
+            var board_test = document.getElementById("board");
+            var contents = document.getElementById("writeBoard");
+            newDIV.setAttribute("class","input-group col-xs-12");
+            newDIV.setAttribute("id", "prev_contents");
+            newDIV.innerHTML = [
+            "제목 : ",
+            board_title,
+            "<br>",
+            "작성자 : ",
+            user_name,
+            "<br>",
+            "내용 : <br>",
+            "전공종합설계",
+            "<button type='button' id='close_text' class='btn pull-right btn-danger'>닫기</button>"
+            ].join(" ");
+
+            board_test.insertBefore(newDIV,contents);
+    });
+
+    $(document).on("click","#close_text",function(){
+        var myDiv = document.getElementById("prev_contents");
+        var parent = myDiv.parentElement; // 부모 객체 알아내기
+        parent.removeChild(myDiv); // 부모로부터 myDiv 객체 떼어내기
+    })
+
+</script>
+
+<script>
+    function executeCode(){
+        var contents = ace.edit("editor").getValue();
+        var language = $("#selectedLang option:selected").val();
+        var roomId = "[[ ${activatedRoom} ]]";
+        var mainClass = $("#mainClass").val();
+        console.log(language+" "+roomId+" "+contents);
+        var result = compile(language, roomId, contents, mainClass);
+        console.log(result);
+        $("#executeResult").val(result);
+    }
+</script>
+
+<script>
+var inputCheck = 0;
+var originCol = 0;
+var originRow = 0;
+var originCol_tmp = 0;
+var originRow_tmp = 0;
+$(document).ready(function(){
+    ace.edit("editor").on('input', function(e, target) {
+            if(inputCheck){
+                inputCheck = 0;
+                return;
+             }
+            console.log(target.prevOp.args);
+            console.log(target.prevOp.command.name);
+
+            console.log(target.selection.cursor.column);
+            console.log(target.selection.cursor.row);
+            console.log(target);
+
+            sendCode(target.prevOp.args, target.prevOp.command.name, originCol, originRow, originCol_tmp, originRow_tmp, "[[ ${activatedRoom} ]]", "[[ ${userId} ]]");
+
+            //inputCheck = 1;
+            originCol = target.selection.cursor.column;
+            originRow = target.selection.cursor.row;
+    });
+
+     ace.edit("editor").selection.on('changeCursor', function() {
+        originRow = originRow_tmp;
+        originCol = originCol_tmp;
+        originRow_tmp = ace.edit("editor").selection.cursor.row;
+        originCol_tmp = ace.edit("editor").selection.cursor.column;
+        console.log("change cursor["+originCol+","+originRow+"]");
+    });
+
+    sourceConnect("[[ ${activatedRoom} ]]", "[[ ${userId} ]]");
+    connect();
+});
+
+
+</script>
+</body>
+
+</html>

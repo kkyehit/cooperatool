@@ -1,0 +1,4 @@
+com\teamviewer\paintserver\config\filter.class
+com\teamviewer\paintserver\model\request\PaintRequestModel$PaintRequestModelBuilder.class
+com\teamviewer\paintserver\model\request\PaintRequestModel.class
+com\teamviewer\paintserver\config\filterConfig.class

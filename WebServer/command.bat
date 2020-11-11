@@ -1,0 +1,1 @@
+mvn clean & mvn package & docker build -t cooperatoolcr.azurecr.io/web2 . & docker push cooperatoolcr.azurecr.io/web2 & kubectl delete deployment web-dp & kubectl apply -f deploy.yaml 

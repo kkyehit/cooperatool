@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: calendar-service
+  labels:
+    run: calendar-service
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8081
+  selector:
+    app: calendar-docker #endpoint pod에 연결

@@ -1,0 +1,1 @@
+mvn clean & mvn package & docker build -t cooperatoolcr.azurecr.io/database . & docker push cooperatoolcr.azurecr.io/database & kubectl delete deployment database-docker-deployment & kubectl apply -f deploy.yaml 

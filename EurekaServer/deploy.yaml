@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: euraka-dp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: app
+      service: eureka
+  template:
+    metadata:
+      labels:
+        type: app
+        service: eureka
+    spec:
+      containers:
+        - name: eureka
+          image: cooperatoolcr.azurecr.io/eureka
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-svc
+spec:
+  ports:
+    - port: 8761
+      protocol: TCP
+      targetPort: 8761
+  selector:
+    type: app
+    service: eureka

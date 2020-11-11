@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-dp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: app
+      service: user
+  template:
+    metadata:
+      labels:
+        type: app
+        service: user
+    spec:
+      containers:
+        - name: user
+          image: cooperatoolcr.azurecr.io/user
+          env:
+            - name: eurekaSvc
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: eurekaSvc
+            - name: eurekaPort
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: eurekaPort
+            - name: MySQL_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-info
+                  key: MySQL_URL
+            - name: MySQL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-info
+                  key: MySQL_PORT
+            - name: MySQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-info
+                  key: MySQL_USER
+            - name: MySQL_PW
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-info
+                  key: MySQL_PW
+            - name: MySQL_DB
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-info
+                  key: MySQL_DB
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-svc
+spec:
+  ports:
+    - port: 8880
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    type: app
+    service: web

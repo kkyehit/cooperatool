@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  eurekaSvc: "eureka-svc"
+  eurekaPort: "8761"
+  zuulSvc: "zuul-svc"
+  zuulPort: "5555"
+  userSvc: "user-svc"
+  userPort: "8080"
+  webSvc: "web-svc"
+  webPort: "8100"
+  boardSvc: "board-svc"
+  boardPort: "8200"
+  roomSvc: "room-svc"
+  roomPort: "8300"
+  execSvc: "exec-svc"
+  execPort: "8400"
+  chatSvc: "chat-svc"
+  chatPort: "8500"
+
